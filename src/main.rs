@@ -99,12 +99,6 @@ async fn handle_event(
                             http.execute_webhook(webhooker.id, webhooker.token.unwrap().as_str())
                                 .username(&msg.author.name.clone())?
                                 .content(&msg.content.clone())?
-                                /*
-                                .avatar_url(&format!(
-                                    "https://cdn.discordapp.com/avatars/{}/{}.png",
-                                    msg.author.id, msg.author.avatar.unwrap().to_string()
-                                ))
-                                */
                                 .avatar_url(&avatar_url)
                                 .await?;
                         }
