@@ -89,13 +89,23 @@ async fn handle_event(
                                 );
                             }
                             let webhooker = webhooker.unwrap();
+                            let mut avatar_url: String = String::new();
+                            if let Some(avatar) = msg.author.avatar {
+                                avatar_url = format!(
+                                    "https://cdn.discordapp.com/avatars/{}/{}.png",
+                                    msg.author.id, avatar.to_string()
+                                )
+                            }
                             http.execute_webhook(webhooker.id, webhooker.token.unwrap().as_str())
                                 .username(&msg.author.name.clone())?
                                 .content(&msg.content.clone())?
+                                /*
                                 .avatar_url(&format!(
                                     "https://cdn.discordapp.com/avatars/{}/{}.png",
                                     msg.author.id, msg.author.avatar.unwrap().to_string()
                                 ))
+                                */
+                                .avatar_url(&avatar_url)
                                 .await?;
                         }
                     }
