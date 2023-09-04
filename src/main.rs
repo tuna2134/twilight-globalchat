@@ -3,13 +3,13 @@ use std::{env, error::Error, sync::Arc};
 use twilight_cache_inmemory::{InMemoryCache, ResourceType};
 use twilight_gateway::{Event, Intents, Shard, ShardId};
 use twilight_http::Client as HttpClient;
-use twilight_model::channel::webhook::Webhook;
+use twilight_model::channel::Webhook;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     dotenv().ok();
     let token = env::var("DISCORD_TOKEN")?;
-    
+
     let intents = Intents::GUILD_MESSAGES | Intents::MESSAGE_CONTENT | Intents::GUILDS;
 
     let mut shard = Shard::new(ShardId::ONE, token.clone(), intents);
@@ -64,7 +64,7 @@ async fn handle_event(
                             let webhooks = http.channel_webhooks(target.id).await?;
                             let mut webhooker: Option<Webhook> = None;
                             for webhook in webhooks.model().await? {
-                                if webhook.name.clone().unwrap() == "test-global".to_string() {
+                                if webhook.name.clone().unwrap() == *"test-global" {
                                     webhooker = Some(webhook);
                                     break;
                                 }
@@ -82,7 +82,7 @@ async fn handle_event(
                             if let Some(avatar) = msg.author.avatar {
                                 avatar_url = format!(
                                     "https://cdn.discordapp.com/avatars/{}/{}.png",
-                                    msg.author.id, avatar.to_string()
+                                    msg.author.id, avatar
                                 )
                             }
                             http.execute_webhook(webhooker.id, webhooker.token.unwrap().as_str())
