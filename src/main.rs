@@ -9,26 +9,18 @@ use twilight_model::channel::webhook::Webhook;
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     dotenv().ok();
     let token = env::var("DISCORD_TOKEN")?;
-
-    // Specify intents requesting events about things like new and updat
+    
     let intents = Intents::GUILD_MESSAGES | Intents::MESSAGE_CONTENT | Intents::GUILDS;
 
-    // Create a single shard.
     let mut shard = Shard::new(ShardId::ONE, token.clone(), intents);
-
-    // The http client is separate from the gateway, so startup a new
-    // one, also use Arc such that it can be cloned to other threads.
     let http = Arc::new(HttpClient::new(token));
 
-    // Since we only care about messages, make the cache only process messages.
     let cache = Arc::new(
         InMemoryCache::builder()
             .resource_types(ResourceType::MESSAGE | ResourceType::CHANNEL)
             .build(),
     );
 
-    // Startup the event loop to process each event in the event stream as they
-    // come in.
     loop {
         let event = match shard.next_event().await {
             Ok(event) => event,
@@ -42,10 +34,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                 continue;
             }
         };
-        // Update the cache.
         cache.update(&event);
-
-        // Spawn a new task to handle the event
         tokio::spawn(handle_event(event, Arc::clone(&http), Arc::clone(&cache)));
     }
 
